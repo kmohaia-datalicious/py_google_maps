@@ -2,7 +2,7 @@ import sys
 
 from templates import *
 from icons import *
-API_KEY = 'AIzaSyBV9KyjEBGAquahYwfVA1MkrMkcXjvsR_g'
+
 
 # steps for creating a simple map
 # 1. declare the application as HTML5 <!DOCTYPE html> declaration
@@ -228,6 +228,7 @@ class GoogleMaps(object):
 			of.write(self.html)
 
 if __name__=='__main__':
+	# API_KEY can be obtained from the google https://developers.google.com/maps/documentation/javascript/tutorial
 	gm = GoogleMaps(key=API_KEY, center_lat=-34.397, center_lon=150.644, zoom=12)
 	gm.add_marker(lat=-34.392,lon=150.624, title='marker1', icon='light_blue_dot')
 	gm.add_marker(lat=-34.389,lon=150.614, title='marker2', icon='green_dot')
@@ -236,4 +237,4 @@ if __name__=='__main__':
 	gm.add_circle(lat=-34.397, lon=150.644, radius=150)
 	gm.add_circle(lat=-34.327, lon=150.604, radius=1500)
 	gm.add_circle(lat=-34.392,lon=150.624, radius=1000)
-	gm.create_static_html(outfile='tailor_test.html')
+	gm.create_static_html(outfile='test.html')
