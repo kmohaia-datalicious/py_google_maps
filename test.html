@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html ng-app="appMaps">
+<head>
+    <title>Google Maps app</title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+	<style>
+	
+.angular-google-map-container { height: 800px; }
+
+
+	</style>
+
+	
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvx1iHz6ZDmvR5DpXHx9TrIvw4_hfg8-s"></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.underscore.js'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js'></script>
+<script src='http://cdn.jsdelivr.net/angular.google-maps/1.1.0/angular-google-maps.min.js'></script>
+
+
+	<script>
+
+	var model = {"circles": [{"stroke": {"color": "#FF0000", "opacity": 0.8, "weight": 2}, "radius": 150, "center": {"latitude": -34.397, "longitude": 150.644}, "fill": {"color": "green", "opacity": 0.35}}, {"stroke": {"color": "#FF0000", "opacity": 0.8, "weight": 2}, "radius": 1500, "center": {"latitude": -34.327, "longitude": 150.604}, "fill": {"color": "green", "opacity": 0.35}}, {"stroke": {"color": "#FF0000", "opacity": 0.8, "weight": 2}, "radius": 1000, "center": {"latitude": -34.392, "longitude": 150.624}, "fill": {"color": "green", "opacity": 0.35}}], "options": {"scrollwheel": false}, "center": {"latitude": -34.397, "longitude": 150.644}, "markers": [{"icon": "http://maps.google.com/mapfiles/ms/micons/ltblue-dot.png", "coords": {"latitude": -34.392, "longitude": 150.624}, "title": "marker1"}, {"icon": "http://maps.google.com/mapfiles/ms/micons/green-dot.png", "coords": {"latitude": -34.389, "longitude": 150.614}, "title": "marker2"}, {"icon": "http://maps.google.com/mapfiles/ms/micons/red-dot.png", "coords": {"latitude": -34.392, "longitude": 150.634}, "title": "marker3"}, {"icon": "http://maps.google.com/mapfiles/ms/micons/ylw-pushpin.png", "coords": {"latitude": -34.389, "longitude": 150.654}, "title": "marker4"}], "zoom": 12};
+
+	var appMaps = angular.module('appMaps', ['google-maps']);
+
+	appMaps.controller('mainCtrl', function($scope, $log) {
+		$scope.map = model;
+    	});
+	</script>
+</head>
+<body>
+	<div id="map_canvas" ng-controller="mainCtrl">
+    		<google-map center="map.center" zoom="map.zoom" draggable="true" options="options">
+			<marker  data-ng-repeat="marker in map.markers" coords="marker.coords" icon="marker.icon">
+				<window show="show">
+					<div>{{marker.title}}</div>
+				</window>
+			</marker>
+			<circle data-ng-repeat="c in map.circles" center="c.center" stroke="c.stroke" fill="c.fill" radius="c.radius"></circle>
+		</google-map>
+	</div>
+</body>
+</html>
