@@ -1,5 +1,5 @@
 import sys
-
+import json
 from templates import *
 from icons import *
 
@@ -33,31 +33,65 @@ class InfoWindow(object):
 
 class Circle(object):
 
-	def __init__(self, lat, lon, radius):
-		self.stroke_color = '#FF0000'
-		self.stroke_opacity = 0.8
-		self.stroke_weight = 2
-		self.fill_color = 'green' #'#FF0000'
-		self.fill_opacity = 0.35
-		self.map = 'map'
-		self.center_lat = lat
-		self.center_lon = lon
-		self.radius = radius
+	def __init__(self, **kwargs):
+		try:
+			self.stroke_color = kwargs['stroke_color']
+		except KeyError:
+			self.stroke_color = '#FF0000'
+
+		try:
+			self.stroke_opacity = kwargs['stroke_opacity']
+		except KeyError:
+			self.stroke_opacity = 0.8
+
+
+		try:
+			self.stroke_weight = kwargs['stroke_weight']
+		except KeyError:
+			self.stroke_weight = 2
+
+		try:
+			self.fill_color = kwargs['fill_color']
+		except KeyError:
+			self.fill_color = 'green' #'#FF0000'
+
+		try:
+			self.fill_opacity = kwargs['fill_opacity']
+
+		except KeyError:
+			self.fill_opacity = 0.35
+
+		self.latitude = kwargs['latitude']
+		self.longitude = kwargs['longitude']
+		self.radius = kwargs['radius']
+
 
 	@property
-	def js(self):
-		params = {
-		'STROKE_COLOR': self.stroke_color,
-		'STROKE_OPACITY': str(self.stroke_opacity),
-		'STROKE_WEIGHT': str(self.stroke_weight),
-		'FILL_COLOR': self.fill_color,
-		'FILL_OPACITY': str(self.fill_opacity),
-		'MAP': self.map,
-		'CENTER_LAT': str(self.center_lat),
-		'CENTER_LON': str(self.center_lon),
-		'RADIUS': str(self.radius)
+	def center(self):
+		return {'latitude': self.latitude, 'longitude': self.longitude}
+
+	@property
+	def stroke(self):
+		return {'color': self.stroke_color,
+			'weight': self.stroke_weight,
+			'opacity': self.stroke_opacity}
+
+	@property
+	def fill(self):
+		return { 'color': self.fill_color, 'opacity': self.fill_opacity }
+
+
+	@property
+	def data(self):
+		return {
+		'center': self.center, 'radius': self.radius, 'stroke': self.stroke, 'fill': self.fill
 		}
-		return JS_CIRCLE %params
+
+
+	@property
+	def json(self):
+		return json.dumps(self.data)
+
 
 class Icon(object):
 
@@ -79,10 +113,10 @@ class Icon(object):
 
 class Marker(object):
 
-	def __init__(self, lat, lon, title='', draggable=False, animation=None, icon=None):
+	def __init__(self, latitude, longitude, title='', icon=None):
 		self.title = title
-		self.lat = lat
-		self.lon = lon
+		self.latitude = latitude
+		self.longitude = longitude
 		if icon is None:
 			self._icon = Icon()
 		else:
@@ -93,71 +127,71 @@ class Marker(object):
 		return self._icon.path
 
 	@property
-	def js(self):
-		params = {
-		'MARKER_LAT': self.lat,
-		'MARKER_LON': self.lon,
-		'MARKER_TITLE': self.title,
-		'ICON_IMAGE': self.icon
+	def data(self):
+		return  {
+		'coords': {'latitude': self.latitude, 'longitude': self.longitude},
+		'title': self.title,
+		'icon': self.icon
 		}
-		return JS_MARKER %params
 
-
-class Map(object):
-
-	def __init__(self, id="map-canvas", width=100, height=100, lat=-34.397, lon=150.644, zoom=12, points=None):
-		self.id = id
-		self.width = width
-		self.height = height
-		self.center_lat = lat
-		self.center_lon = lon
-		self.zoom = zoom
-		self._points = points
-		self._js = None
-
-	#@property
-	#def center_lat(self):
-	#	return self._center[0]
-
-	#@property
-	#def center_lon(self):
-	#	return self._center[1]
 
 	@property
-	def js(self):
-		params = {
-			'CENTER_LAT': str(self.center_lat),
-			'CENTER_LON': str(self.center_lon),
-			'ZOOM': str(self.zoom),
-			'MAP_ID': str(self.id)
-			}
-
-		return JS_MAP %params
-
-	@property
-	def points(self):
-		if self._points is None:
-			self._points = []
-		return self._points
-
-	def add_point(self, point):
-		self.points.append(point)
+	def json(self):
+		return json.dumps(self.data)
 
 
 class GoogleMaps(object):
+	_model = {
+	'center': {},
+	'zoom': 12,
+	'options': {},
+	'markers': [],
+	'circles': []
+	}
 
-	def __init__(self, key=None, center_lat=0, center_lon=0, zoom=10, markers=[], circles=[]):
-		self.key = key
-		self._map = None
-		self.init_map(lat=center_lat, lon=center_lon, zoom=zoom)
-		self._markers = markers 				#list of marker objects
-		self._circles = circles					#list of circle objects
+	def __init__(self, **kwargs):
+		self._key = kwargs['key']
+		self._markers = [] 				#list of marker objects
+		self._circles = []					#list of circle objects
+		self._longitude = kwargs['longitude']
+		self._latitude = kwargs['latitude']
+		self._zoom = kwargs['zoom']
+		# google maps options
+		# https://developers.google.com/maps/documentation/javascript/reference#MapOptions
+		try:
+			self._options = kwargs['options']
+		except KeyError:
+			self._options = {}
 
 	@property
-	def map(self):
-		if self._map is None:
-			self._map = Map()
-		return self._map
+	def center(self):
+		return {'latitude': self._latitude, 'longitude': self._longitude}
+
+	@property
+	def zoom(self):
+		return self._zoom
+
+	@property
+	def options(self):
+		return self._options
+
+	@options.setter
+	def options(self, opts):
+		self._options = opts
+
+
+	@property
+	def key(self):
+		return self._key
+
+	@property
+	def model(self):
+		self._model['center'] = self.center
+		self._model['zoom'] = self.zoom
+		self._model['options'] = self.options
+		self._model['markers'] = self.markers
+		self._model['circles'] = self.circles
+		return self._model
 
 	@property
 	def markers(self):
@@ -167,17 +201,14 @@ class GoogleMaps(object):
 	def circles(self):
 		return self._circles
 
-	def init_map(self, lat, lon, zoom):
-		m = Map(lat=lat, lon=lon, zoom=zoom)
-		self._map = m
 
-	def add_marker(self, title, lat, lon, icon=None):
-		m = Marker(lat=lat, lon=lon, title=title, icon=icon)
-		self._markers.append(m)
+	def add_marker(self, title, latitude, longitude, icon=None):
+		m = Marker(latitude=latitude, longitude=longitude, title=title, icon=icon)
+		self.markers.append(m.data)
 
-	def add_circle(self, lat, lon, radius):
-		c = Circle(lat=lat, lon=lon,radius=radius)
-		self._circles.append(c)
+	def add_circle(self, latitude, longitude, radius):
+		c = Circle(latitude=latitude, longitude=longitude,radius=radius)
+		self.circles.append(c.data)
 
 	@property
 	def _js_includes(self):
@@ -186,42 +217,15 @@ class GoogleMaps(object):
 		}
 		return JS_INCLUDES %params
 
-	@property
-	def _js_markers(self):
-		markers = []
-		for m in self.markers:
-			markers.append(m.js)
-		return '\n'.join(markers)
-
-	@property
-	def _js_circles(self):
-		circles = []
-		if not self.circles:return ''
-		for c in self.circles:
-			circles.append(c.js)
-		return '\n'.join(circles)
-
-	@property
-	def _js_main(self):
-
-		params = {
-			'JS_MAP': self.map.js,
-			'JS_MARKER': self._js_markers,
-			'JS_CIRCLE': self._js_circles
-			}
-
-		return JS_MAIN %params
 
 	@property
 	def html(self):
-		params = {
+		return HTML_TEMPLATE %{
 		'CSS': CSS,
 		'JS_INCLUDES': self._js_includes,
-		'JS_MAIN': self._js_main,
-		'MAP_ID': str(self.map.id)
+		'MODEL': json.dumps(self.model)
 		}
 
-		return HTML_TEMPLATE %params
 
 	def create_static_html(self, outfile='test.html'):
 		with open(outfile, 'w') as of:
@@ -229,12 +233,13 @@ class GoogleMaps(object):
 
 if __name__=='__main__':
 	# API_KEY can be obtained from the google https://developers.google.com/maps/documentation/javascript/tutorial
-	gm = GoogleMaps(key=API_KEY, center_lat=-34.397, center_lon=150.644, zoom=12)
-	gm.add_marker(lat=-34.392,lon=150.624, title='marker1', icon='light_blue_dot')
-	gm.add_marker(lat=-34.389,lon=150.614, title='marker2', icon='green_dot')
-	gm.add_marker(lat=-34.392,lon=150.634, title='marker3', icon='red_dot')
-	gm.add_marker(lat=-34.389,lon=150.654, title='marker4', icon='yellow_pushpin')
-	gm.add_circle(lat=-34.397, lon=150.644, radius=150)
-	gm.add_circle(lat=-34.327, lon=150.604, radius=1500)
-	gm.add_circle(lat=-34.392,lon=150.624, radius=1000)
+	API_KEY = sys.argv[1]
+	gm = GoogleMaps(key=API_KEY, latitude=-34.397, longitude=150.644, zoom=12, options={'scrollwheel': False})
+	gm.add_marker(latitude=-34.392, longitude=150.624, title='marker1', icon='light_blue_dot')
+	gm.add_marker(latitude=-34.389, longitude=150.614, title='marker2', icon='green_dot')
+	gm.add_marker(latitude=-34.392, longitude=150.634, title='marker3', icon='red_dot')
+	gm.add_marker(latitude=-34.389, longitude=150.654, title='marker4', icon='yellow_pushpin')
+	gm.add_circle(latitude=-34.397, longitude=150.644, radius=150)
+	gm.add_circle(latitude=-34.327, longitude=150.604, radius=1500)
+	gm.add_circle(latitude=-34.392,longitude=150.624, radius=1000)
 	gm.create_static_html(outfile='test.html')
