@@ -1,86 +1,86 @@
-__all__= ['CSS', 'JS_INCLUDES', 'JS_MAIN', 'JS_MAP', 'JS_MARKER', 'JS_CIRCLE', 'JS_INFO_WINDOW', 'HTML_TEMPLATE']
+__all__= ['CSS', 'SAMPLE_MODEL', 'JS_INCLUDES', 'HTML_TEMPLATE']
 
 CSS = """
-html { height: 100% }
-body { height: 100%; margin: 0; padding: 0 }
-#map-canvas { height: 100% }
+.angular-google-map-container { height: 800px; }
 """
 
-JS_INFO_WINDOW = """
-
+SAMPLE_MODEL = """
+{
+center: {latitude: 40.1451, longitude: -99.6680 },
+zoom: 14,
+options : {scrollwheel: false},
+markers : [
+{ coords: {latitude: 40.1451, longitude: -99.6680}, icon: "", title: "Marker1" },
+{ coords: {latitude: 40.1452, longitude: -99.6681}, icon: "", title: "Marker2" },
+{ coords: {latitude: 40.1453, longitude: -99.6683}, icon: "", title: "Marker3" },
+],
+circles : [
+	{
+	center: { latitude: 40.1451, longitude: -99.680 },
+	radius: 1000,
+	stroke: { color: '#08B21F', weight: 2, opacity: 1 },
+	fill: { color: '#08B21F', opacity: 0.5}
+	},
+	{
+	center: { latitude: 40.1449, longitude: -99.670 },
+	radius: 1000,
+	stroke: { color: '#08B21F', weight: 2, opacity: 1 },
+	fill: { color: '#08B21F', opacity: 0.5}
+	},
+	{
+	center: { latitude: 40.1452, longitude: -99.683 },
+	radius: 1000,
+	stroke: { color: '#08B21F', weight: 2, opacity: 1 },
+	fill: { color: '#08B21F', opacity: 0.5}
+	}
+]
+};
 """
 
 JS_INCLUDES = """
-"https://maps.googleapis.com/maps/api/js?key=%(API_KEY)s"
-"""
-
-JS_MAIN = """
-function initialize() {
-
-	%(JS_MAP)s
-
-	%(JS_CIRCLE)s
-
-	%(JS_MARKER)s
-      }
-      google.maps.event.addDomListener(window, 'load', initialize);
+<script src="https://maps.googleapis.com/maps/api/js?key=%(API_KEY)s"></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.underscore.js'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js'></script>
+<script src='http://cdn.jsdelivr.net/angular.google-maps/1.1.0/angular-google-maps.min.js'></script>
 """
 
 
-JS_MAP = """
-
-var mapOptions = {
-          center: new google.maps.LatLng(%(CENTER_LAT)s, %(CENTER_LON)s),
-          zoom: %(ZOOM)s
-        };
-
-        var map = new google.maps.Map(document.getElementById("%(MAP_ID)s"),
-            mapOptions);
-
-"""
-
-JS_MARKER = """
-var marker = new google.maps.Marker({
-	position: new google.maps.LatLng(%(MARKER_LAT)s, %(MARKER_LON)s),
-      	map: map,
-      	title: '%(MARKER_TITLE)s',
-	icon: '%(ICON_IMAGE)s'
-});
-"""
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <style type="text/css">
-    	%(CSS)s
-    </style>
+<html ng-app="appMaps">
+<head>
+    <title>Google Maps app</title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+	<style>
+	%(CSS)s
 
-    <script type="text/javascript" src=%(JS_INCLUDES)s>
-    </script>
+	</style>
 
-    <script type="text/javascript">
-	%(JS_MAIN)s
-    </script>
+	%(JS_INCLUDES)s
 
-  </head>
-  <body>
-    <div id="%(MAP_ID)s"/>
-  </body>
+	<script>
+
+	var model = %(MODEL)s;
+
+	var appMaps = angular.module('appMaps', ['google-maps']);
+
+	appMaps.controller('mainCtrl', function($scope, $log) {
+		$scope.map = model;
+    	});
+	</script>
+</head>
+<body>
+	<div id="map_canvas" ng-controller="mainCtrl">
+    		<google-map center="map.center" zoom="map.zoom" draggable="true" options="options">
+			<marker  data-ng-repeat="marker in map.markers" coords="marker.coords" icon="marker.icon">
+				<window show="show">
+					<div>{{marker.title}}</div>
+				</window>
+			</marker>
+			<circle data-ng-repeat="c in map.circles" center="c.center" stroke="c.stroke" fill="c.fill" radius="c.radius"></circle>
+		</google-map>
+	</div>
+</body>
 </html>
-"""
-
-JS_CIRCLE = """
-var circleOptions = {
-      strokeColor: '%(STROKE_COLOR)s',
-      strokeOpacity: %(STROKE_OPACITY)s,
-      strokeWeight: %(STROKE_WEIGHT)s,
-      fillColor: '%(FILL_COLOR)s',
-      fillOpacity: %(FILL_OPACITY)s,
-      map: %(MAP)s,
-      center: new google.maps.LatLng(%(CENTER_LAT)s, %(CENTER_LON)s),
-      radius: %(RADIUS)s
-    };
-    circle = new google.maps.Circle(circleOptions);
 """
