@@ -1,0 +1,43 @@
+{
+"circles": [
+		{
+		"stroke": {"color": "#FF0000", "opacity": 0.8, "weight": 2}, 
+		"radius": 1500, "center": {"latitude": -34.397, "longitude": 150.644},
+		"fill": {"color": "green", "opacity": 0.35}}, 
+		{"stroke": {"color": "#FF0000", "opacity": 0.8, "weight": 2}, 
+		"radius": 1500, "center": {"latitude": -34.327, "longitude": 150.604}, 
+		"fill": {"color": "green", "opacity": 0.35}}, 
+		{"stroke": {"color": "#FF0000", "opacity": 0.8, "weight": 2}, 
+		"radius": 1000, "center": {"latitude": -34.392, "longitude": 150.624}, 
+		"fill": {"color": "green", "opacity": 0.35}
+		}
+	], 
+"options": {"scrollwheel": false}, 
+"center": {"latitude": -34.397, "longitude": 150.644}, 
+"markers": [
+		{
+		"icon": "http://maps.google.com/mapfiles/ms/micons/ltblue-dot.png", 
+		"coords": {"latitude": -34.392, "longitude": 150.624}, "title": "marker1"}, 
+		{"icon": "http://maps.google.com/mapfiles/ms/micons/green-dot.png", 
+		"coords": {"latitude": -34.389, "longitude": 150.614}, "title": "marker2"}, 
+		{"icon": "http://maps.google.com/mapfiles/ms/micons/red-dot.png", 
+		"coords": {"latitude": -34.392, "longitude": 150.634}, "title": "marker3"}, 
+		{"icon": "http://maps.google.com/mapfiles/ms/micons/ylw-pushpin.png", 
+		"coords": {"latitude": -34.666, "longitude": 150.666}, "title": "TEST22"}, 
+		{"icon": "http://maps.google.com/mapfiles/ms/micons/ylw-pushpin.png", 
+		"coords": {"latitude": -34.389, "longitude": 150.654}, "title": "marker4"
+		}
+	],
+"polylines": ["path":[
+		{"latitude": -34.392, "longitude": 150.624},
+		{"latitude": -34.389, "longitude": 150.614},
+		{"latitude": -34.392, "longitude": 150.634},
+		{"latitude": -34.666, "longitude": 150.666}, 
+		{"latitude": -34.389, "longitude": 150.654}
+		}
+		]
+
+	],
+ 
+"zoom": 12
+}
